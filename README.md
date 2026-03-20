@@ -77,3 +77,4 @@ The application is structured as a Modular Monolith to keep domains logically se
 
 *   **Write Model / System of Record:** Prioritized across the core services (InstallmentGenerationService, PaymentAllocationService, ReminderEngineService).
 *   **Robustness:** Incorporates retry queues and delivery event tracking for reliability (e.g., message retry queues).
+
