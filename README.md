@@ -1,70 +1,79 @@
-# 🎯 Vertical SaaS Cash Machine (FeeFlow) - Project Overview
+# FeeFlow Backend
 
-This document summarizes the core product, architecture, and implementation plan for FeeFlow, an Installment Control & Recovery System for competitive coaching institutes.
+FeeFlow is an Installment Control & Recovery System backend built for competitive coaching institutes. This repository contains the backend services built as a Modular Monolith.
 
-## 1. Product & Market Strategy
+## Architecture & Technology Stack
 
-*   **Goal:** Build a "vertical SaaS cash machine" (side project, 8 hrs/week focus) aimed at faster first revenue, not VC-scale startup.
-*   **Target Market:** Competitive coaching institutes in Tier-2 / Tier-3 cities, typically single-branch, with 300–1500 students (running NEET, JEE, UPSC programs).
-*   **Positioning:**
-    *   **You Are:** Installment Control & Recovery System. An operational partner improving business discipline.
-    *   **Primary Angle:** Simplicity & Automation (better than Excel, no manual follow-up).
-    *   **Core Focus:** Recovery Improvement / ROI (positioned as a recovery tool, not a cost center).
-*   **Pricing Direction:** Flat pricing initially, targeted at **₹3,999 – ₹5,999/month**.
-*   **Go-To-Market:** Focus on one Tier-2/3 city at a time with direct outreach, demo-led sales, and ROI conversation.
+*   **Framework:** Spring Boot 3
+*   **Language:** Java 21
+*   **Database:** PostgreSQL (for transactions, indexing, JSON support)
+*   **Messaging/Queue:** Redis Queue (for background tasks/reminders)
+*   **Build Tool:** Maven
 
-## 2. Product Scope (V1 - Desktop First)
+### Backend Modules (Logical Bounded Contexts)
 
-**Core Modules:**
+*   `feeflow-auth`: Authentication and Authorization
+*   `feeflow-students`: Student and Batch Management
+*   `feeflow-fees`: Installment Engine (Core Brain)
+*   `feeflow-payments`: Payment Tracking and Allocation Flow
+*   `feeflow-reminders`: Automation Engine (e.g. async WhatsApp sending)
+*   `feeflow-broadcast`: Batch-based messaging
+*   `feeflow-common`: Shared utilities and domain objects
+*   `feeflow-api`: Main API gateway/application runner
 
-1.  **Institute & User Management:** Multi-tenant via `institute_id`.
-2.  **Student & Batch Management:** Student profiles, batch assignment, fee info.
-3.  **Installment Engine (Core Brain):** Plan generator, persisted installment records, payment history.
-4.  **Reminder Automation Engine:** Configurable rules, Cron-based runner, Async WhatsApp sending, Reminder logs.
-5.  **Financial Dashboard:** Total receivable, overdue, upcoming dues, monthly collection.
-6.  **Broadcast System:** Batch-based messaging with tracking.
-7.  **Audit Logs:** Tracking changes (Payments, Reminders, Broadcasts).
+## Local Development Setup
 
-**Intentional Exclusions (V1 Discipline):** Attendance, LMS, Test Analytics, Student/Teacher apps, Multi-branch complexity, Payment Gateway Integration.
+Follow these steps to set up the FeeFlow backend on your local machine.
 
-## 3. System & Database Architecture
+### Prerequisites
 
-*   **Architecture:** Modular Monolith with **Spring Boot 3** and **Java 21**.
-*   **Database:** **PostgreSQL** (chosen for transactions, indexing, JSON support, SaaS standard).
-*   **Messaging/Queue:** **Redis Queue** (for reminders) and **Worker process**. WhatsApp Cloud API via Meta for messaging.
-*   **Backend Modules (Logical Bounded Contexts):**
-    *   `feeflow-auth`
-    *   `feeflow-students`
-    *   `feeflow-fees` (Core Engine)
-    *   `feeflow-payments` (Money Flow)
-    *   `feeflow-reminders` (WhatsApp Automation Engine)
-    *   `feeflow-broadcast`
-    *   `feeflow-common`
-    *   `feeflow-infrastructure` (External Integrations)
+Ensure you have the following installed:
+1.  **Java Development Kit (JDK) 21:** Required for compiling and running the application.
+2.  **Apache Maven:** For building the project and managing dependencies (or use the provided `mvnw` wrapper).
+3.  **PostgreSQL (v14+ recommended):** The primary relational database.
+4.  **Redis:** Used for messaging queues and caching.
 
-### Key Database Design Points
+### Database Setup
 
-*   The schema is finalized to support complex scenarios: partial payments, discounts (at enrollment and midway), payment allocation, and receipts.
-*   **Discount Rule:** We **never modify already paid installments**; we only adjust remaining ones (Scenario B).
-*   **Reminder Reliability:** Two critical tables added for production robustness:
-    *   `message_delivery_events`: Tracks delivery lifecycle (queued, sent, delivered) from the provider.
-    *   `message_retry_queue`: Manages automatic retries for failed message sends.
+1. Install and start your local PostgreSQL server.
+2. Create a new database for the application (e.g., `feeflow`).
+3. Ensure the database credentials match the configuration in your local properties files. *Note: You will need to configure `application.properties` or `application.yml` in the `feeflow-api/src/main/resources` directory (create it if it doesn't exist) with your database connection details.*
 
-## 4. Implementation Plan (Phase 1 Focus)
+### Redis Setup
 
-The recommended strategy is to prioritize the **Write Model** (system of record) and the three core services.
+1. Install and start your local Redis server.
+2. Ensure Redis is accessible on the default port (6379) or update your application configuration accordingly.
 
-### Core Services (The Brain of FeeFlow)
+### Building the Project
 
-1.  `InstallmentGenerationService`
-2.  `PaymentAllocationService`
-3.  `ReminderEngineService`
+Clone the repository and build the project using Maven from the root directory:
 
-### Phase 1 MVP Focus
+```bash
+# Using installed Maven
+mvn clean install
 
-1.  **Phase 1 Core:** Students, Fee Structures, Installment Generation.
-    *   **Core Modules:** `feeflow-students`, `feeflow-fees`, `feeflow-payments`.
-2.  **Phase 2:** Payments and Allocation Engine.
-3.  **Phase 3 (Later):** Reminder Engine and WhatsApp Integration.
+# Or using the Maven Wrapper
+./mvnw clean install
+```
 
-**Initial MVP Endpoints:** POST/GET `/students`, POST `/fee-structures`, POST `/student-fees`, GET `/students/{id}/installments`, POST `/payments`.
+### Running the Application
+
+Once the project is built and your database/Redis instances are running, you can start the application by running the main API module:
+
+```bash
+cd feeflow-api
+mvn spring-boot:run
+```
+
+Alternatively, you can run the generated `.jar` file directly:
+
+```bash
+java -jar feeflow-api/target/feeflow-api-0.0.1-SNAPSHOT.jar
+```
+
+## Module Structure
+
+The application is structured as a Modular Monolith to keep domains logically separate while deploying as a single unit:
+
+*   **Write Model / System of Record:** Prioritized across the core services (InstallmentGenerationService, PaymentAllocationService, ReminderEngineService).
+*   **Robustness:** Incorporates retry queues and delivery event tracking for reliability (e.g., message retry queues).
