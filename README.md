@@ -1,4 +1,4 @@
-# FeeFlow Backend
+# feeflow-backend
 
 FeeFlow is an Installment Control & Recovery System backend built for competitive coaching institutes. This repository contains the backend services built as a Modular Monolith.
 
