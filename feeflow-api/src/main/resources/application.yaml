@@ -4,10 +4,31 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: yourpassword
+    password: password # Replace with actual local DB password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      auto-commit: true
   flyway:
+    enabled: true
     baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate # Best practice when using Flyway is 'validate' instead of 'update'
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Security & JWT Properties
+application:
+  security:
+    jwt:
+      # 256-bit Hex encoded secret key for HMAC SHA256
+      secret-key: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+      # Token expiration time in milliseconds (1 hour = 3600000 ms)
+      expiration: 3600000

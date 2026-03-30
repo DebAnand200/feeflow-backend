@@ -17,6 +17,18 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring Web for HTTP Status and ResponseEntity in Exception Handlers -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Security for AccessDeniedException and BadCredentialsException -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
