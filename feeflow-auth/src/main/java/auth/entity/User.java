@@ -35,6 +35,9 @@ public class User {
     
     private String status;
 
+    private String resetOtp;
+    private LocalDateTime otpExpiry;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

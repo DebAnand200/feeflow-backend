@@ -88,8 +88,6 @@
 				<artifactId>feeflow-payments</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-
 		</dependencies>
 	</dependencyManagement>
 
