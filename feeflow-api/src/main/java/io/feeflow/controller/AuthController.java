@@ -3,6 +3,8 @@ package io.feeflow.controller;
 import auth.service.AuthService;
 import common.dto.auth.AuthResponse;
 import common.dto.auth.LoginRequest;
+import common.dto.auth.ForgotPasswordRequest;
+import common.dto.auth.ResetPasswordRequest;
 import common.dto.auth.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +39,19 @@ public class AuthController {
     @PostMapping("/logout")
     public String logout() {
         return authService.logout();
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(
+            @RequestBody common.dto.auth.ForgotPasswordRequest request
+    ) {
+        return authService.forgotPassword(request.getEmail());
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(
+            @RequestBody common.dto.auth.ResetPasswordRequest request
+    ) {
+        return authService.resetPassword(request);
     }
 }
